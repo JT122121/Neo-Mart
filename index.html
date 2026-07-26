@@ -1,99 +1,41 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+    <title>Neo Mart Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+        }
 
-<title>Neo Mart Scanner</title>
+        video {
+            width: 100%;
+            max-width: 500px;
+        }
 
-<link rel="stylesheet" href="style.css">
-
+        #result {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+    </style>
 </head>
-
 
 <body>
 
+<h2>Neo Mart Barcode Scanner</h2>
 
-<div class="container">
+<video id="video" autoplay></video>
 
-
-<div id="permissionBox" class="box">
-
-<h2>📷 Camera Permission</h2>
-
-<p>
-Neo Mart Scanner needs camera access
-to scan product barcodes.
-</p>
-
-<button onclick="requestCamera()">
-Allow Camera
-</button>
-
+<div id="result">
+Waiting for barcode...
 </div>
 
 
-
-<h1>🛒 Neo Mart Scanner</h1>
-
-
-<video id="camera" autoplay playsinline></video>
-
-
-<button id="startBtn">
-Start Scanner
-</button>
-
-
-
-<p id="status">
-Waiting for permission...
-</p>
-
-
-
-
-<div id="itemInfo" class="hidden">
-
-
-<h2>Product Information</h2>
-
-
-<p>
-Barcode:
-<span id="barcode"></span>
-</p>
-
-
-<p>
-Item:
-<span id="item"></span>
-</p>
-
-
-<p>
-Price:
-<span id="price"></span>
-</p>
-
-
-</div>
-
-
-
-<button id="scanAgain" class="hidden">
-🔄 Scan Again
-</button>
-
-
-
-</div>
-
-
+<script src="https://unpkg.com/@zxing/library@latest"></script>
 <script src="javascript.js"></script>
 
-
 </body>
-
 </html>
