@@ -1,57 +1,85 @@
-const codeReader = new ZXing.BrowserMultiFormatReader();
-
-const button = document.getElementById("startCamera");
-const result = document.getElementById("result");
+let codeReader = new ZXing.BrowserMultiFormatReader();
 
 
-button.onclick = async function () {
+function startScanner(){
 
-    result.innerHTML = "Scanning...";
-
-    try {
-
-        const devices = await codeReader.listVideoInputDevices();
-
-        let cameraId = devices[0].deviceId;
+document.getElementById("result").innerHTML =
+"Opening camera...";
 
 
-        // choose back camera
-        for (let device of devices) {
-
-            if (
-                device.label.toLowerCase().includes("back") ||
-                device.label.toLowerCase().includes("rear")
-            ) {
-                cameraId = device.deviceId;
-            }
-
-        }
+codeReader.listVideoInputDevices()
+.then((devices)=>{
 
 
-        codeReader.decodeFromVideoDevice(
-            cameraId,
-            "video",
-            (barcode, error) => {
-
-                if (barcode) {
-
-                    result.innerHTML =
-                    "✅ Barcode:<br>" + barcode.text;
-
-                    console.log(barcode.text);
-
-                    codeReader.reset();
-
-                }
-
-            }
-        );
+let cameraId = devices[0].deviceId;
 
 
-    } catch (error) {
+// Find back camera
 
-        result.innerHTML = "Camera Error: " + error;
+for(let i=0;i<devices.length;i++){
 
-    }
+let label = devices[i].label.toLowerCase();
 
-};
+
+if(label.includes("back") || 
+   label.includes("rear") ||
+   label.includes("environment")){
+
+cameraId = devices[i].deviceId;
+
+break;
+
+}
+
+}
+
+
+
+codeReader.decodeFromVideoDevice(
+
+cameraId,
+
+"video",
+
+(result, error)=>{
+
+
+if(result){
+
+
+let barcode = result.text;
+
+
+document.getElementById("result").innerHTML =
+"✅ Barcode Found:<br>"+barcode;
+
+
+console.log(barcode);
+
+
+// stop after scan
+
+codeReader.reset();
+
+
+}
+
+
+}
+
+
+);
+
+
+})
+
+
+.catch(error=>{
+
+document.getElementById("result").innerHTML =
+"Camera Error: "+error;
+
+});
+
+
+}
