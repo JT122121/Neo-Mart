@@ -1,41 +1,83 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Neo Mart Scanner</title>
+    <title>Neo Mart Barcode Scanner</title>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             text-align: center;
+            padding: 20px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        button {
+
+            font-size: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+
         }
 
         video {
+
             width: 100%;
             max-width: 500px;
+            margin-top: 20px;
+            border-radius: 10px;
+
         }
 
         #result {
+
             margin-top: 20px;
             font-size: 22px;
             font-weight: bold;
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-<h2>Neo Mart Barcode Scanner</h2>
 
-<video id="video" autoplay></video>
+<h2>Neo Mart Scanner</h2>
+
+
+<button id="startCamera">
+📷 Start Scanner
+</button>
+
+
+<br><br>
+
+
+<video id="video" autoplay playsinline></video>
+
 
 <div id="result">
 Waiting for barcode...
 </div>
 
 
+
+<!-- ZXing Barcode Library -->
 <script src="https://unpkg.com/@zxing/library@latest"></script>
+
+
 <script src="javascript.js"></script>
+
 
 </body>
 </html>
