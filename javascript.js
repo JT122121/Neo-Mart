@@ -1,314 +1,117 @@
-let video = document.getElementById("camera");
-
-let stream = null;
-
-let barcodeDetector;
-
-let scanning = false;
-
-
-
-// Ask camera permission
-
-async function requestCamera(){
-
-
-try{
-
-
-stream = await navigator.mediaDevices.getUserMedia({
-
-video:{
-facingMode:{
-ideal:"environment"
-}
-}
-
-});
-
-
-video.srcObject = stream;
-
-
-document.getElementById("permissionBox")
-.style.display="none";
-
-
-document.getElementById("status")
-.innerHTML="Camera Ready";
-
-
-}
-
-
-catch(error){
-
-
-alert(
-"Camera permission denied. Please allow camera in browser settings."
-);
-
-
-}
-
-
-}
-
-
-
-
-
-// Start scanning
-
-document.getElementById("startBtn")
-.onclick = async function(){
-
-
-
-if(!stream){
-
-await requestCamera();
-
-}
-
-
-
-if("BarcodeDetector" in window){
-
-
-barcodeDetector = new BarcodeDetector({
-
-formats:[
-
-"ean_13",
-"ean_8",
-"code_128",
-"qr_code"
-
-]
-
-});
-
-
-scanning=true;
-
-
-document.getElementById("status")
-.innerHTML="Scanning...";
-
-
-scanBarcode();
-
-
-}
-
-else{
-
-
-alert(
-"Barcode scanner is not supported. Please use Chrome Android."
-);
-
-
-}
-
-
+const scanner = new Html5Qrcode("reader");
+
+const config = {
+    fps: 15,
+
+    qrbox: function(viewfinderWidth, viewfinderHeight) {
+        let minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+        let qrboxSize = Math.floor(minEdge * 0.75);
+        return {
+            width: qrboxSize,
+            height: qrboxSize
+        };
+    },
+
+    aspectRatio: 1.7777778,
+
+    videoConstraints: {
+        facingMode: {
+            exact: "environment"
+        },
+        width: {
+            ideal: 1920
+        },
+        height: {
+            ideal: 1080
+        }
+    }
 };
 
 
+function startScanner() {
+
+    Html5Qrcode.getCameras()
+    .then(cameras => {
+
+        if (cameras && cameras.length) {
+
+            let cameraId = cameras[0].id;
+
+            // Select rear camera
+            cameras.forEach(camera => {
+
+                if (
+                    camera.label.toLowerCase().includes("back") ||
+                    camera.label.toLowerCase().includes("rear") ||
+                    camera.label.toLowerCase().includes("environment")
+                ) {
+                    cameraId = camera.id;
+                }
+
+            });
 
 
+            scanner.start(
+
+                cameraId,
+
+                config,
+
+                (decodedText, decodedResult) => {
+
+                    console.log("Barcode detected:", decodedText);
+
+                    document.getElementById("result").innerHTML =
+                    `
+                    <h3>Product Found</h3>
+                    <p>${decodedText}</p>
+                    `;
 
 
+                    // Stop scanning after success
+                    scanner.stop()
+                    .then(() => {
+                        console.log("Scanner stopped");
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
 
-// Barcode detection loop
-
-async function scanBarcode(){
-
-
-if(!scanning)
-return;
-
-
-
-try{
+                },
 
 
-let barcodes =
-await barcodeDetector.detect(video);
+                (errorMessage) => {
+                    // Ignore scanning errors
+                }
+
+            )
+            .catch(err => {
+
+                console.log("Scanner start error:", err);
+
+                alert(
+                    "Cannot start camera. Please allow camera permission."
+                );
+
+            });
 
 
+        }
 
-if(barcodes.length > 0){
+    })
 
+    .catch(err => {
 
-let code =
-barcodes[0].rawValue;
+        console.log(err);
 
+        alert(
+            "No camera detected"
+        );
 
-
-scanning=false;
-
-
-stopCamera();
-
-
-
-findProduct(code);
-
-
-
-return;
-
+    });
 
 }
 
 
 
-}
-
-catch(error){}
-
-
-
-requestAnimationFrame(scanBarcode);
-
-
-}
-
-
-
-
-
-
-
-// Connect to Google Sheet API
-
-function findProduct(code){
-
-
-
-document.getElementById("status")
-.innerHTML="Searching...";
-
-
-
-// PUT YOUR APPS SCRIPT WEB APP URL HERE
-
-let url =
-"https://script.google.com/macros/s/YOUR_WEB_APP_ID/exec?barcode="
-+code;
-
-
-
-fetch(url)
-
-
-.then(response=>response.json())
-
-
-.then(data=>{
-
-
-if(data.success){
-
-
-
-document.getElementById("barcode")
-.innerHTML=data.barcode;
-
-
-document.getElementById("item")
-.innerHTML=data.item;
-
-
-document.getElementById("price")
-.innerHTML=data.price;
-
-
-
-document.getElementById("itemInfo")
-.classList.remove("hidden");
-
-
-
-}
-
-else{
-
-
-document.getElementById("status")
-.innerHTML="Product Not Found";
-
-
-}
-
-
-
-document.getElementById("scanAgain")
-.classList.remove("hidden");
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-// Stop camera
-
-function stopCamera(){
-
-
-if(stream){
-
-
-stream.getTracks()
-.forEach(track=>track.stop());
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-// Scan again
-
-document.getElementById("scanAgain")
-.onclick=function(){
-
-
-document.getElementById("itemInfo")
-.classList.add("hidden");
-
-
-
-document.getElementById("scanAgain")
-.classList.add("hidden");
-
-
-
-document.getElementById("status")
-.innerHTML="Ready";
-
-
-
-document.getElementById("startBtn")
-.click();
-
-
-
-};
+startScanner();
